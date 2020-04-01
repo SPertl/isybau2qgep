@@ -78,7 +78,7 @@ CREATE OR REPLACE VIEW qgisybau.v_kante_haltung AS
     AND a.kante_kantentyp = 0; -- G200 0=Haltung
 
 -- L Leitung
-CREATE OR REPLACE VIEW isybau.v_kante_leitung AS 
+CREATE OR REPLACE VIEW qgisybau.v_kante_leitung AS 
  SELECT a.ogc_fid,
     a.ogr_pkid,
     a.parent_ogr_pkid,
