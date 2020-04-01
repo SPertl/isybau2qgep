@@ -1,12 +1,12 @@
 # Datenaustausch zwischen Postgres und ISYBAU
 
-##Import:
+## Import:
 
-   ogr2ogr -f PostgreSQL PG:"host=127.0.0.1 port=port dbname=isybau password=xxxxxxxxx user=postgres schemas=isybau" GMLAS:Isybau2013-geom2.xml -oo XSD=1302_ISYBAU_XML_Schema\1302-metadaten.xsd -oo EXPOSE_METADATA_LAYERS=YES -forceNullable
+    ogr2ogr -f PostgreSQL PG:"host=127.0.0.1 port=port dbname=isybau password=xxxxxxxxx user=postgres schemas=isybau" GMLAS:Isybau2013-geom2.xml -oo XSD=1302_ISYBAU_XML_Schema\1302-metadaten.xsd -oo EXPOSE_METADATA_LAYERS=YES -forceNullable
 
-##Export:
+## Export:
 
-   ogr2ogr -f GMLAS pgsql-export.xml PG:"host=127.0.0.1 port=port dbname=isybau password=xxxxxxxxx user=postgres schemas=isybau"
+    ogr2ogr -f GMLAS pgsql-export.xml PG:"host=127.0.0.1 port=port dbname=isybau password=xxxxxxxxx user=postgres schemas=isybau"
 
 nach dem Export sind folgende Ersetzungen durchzuführen:
 
