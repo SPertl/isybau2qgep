@@ -7,6 +7,12 @@ EPSG:25832 ETRS89/UTM zone 32N
 --CREATE SCHEMA qgisybau;
 
 -- KNOTEN: Bildung der Punktgeometrien, Achtung: nicht deckungsgleich mit "Abwassertechnische Anlagen", mehrere Punkte pro Anlage (SMP, DMP, etc.) möglich!
+
+
+-------------------------------------------------------------------
+-- PUNKT-GEOMETRIEN -----------------
+-------------------------------------------------------------------
+
 CREATE OR REPLACE VIEW qgisybau.v_punktgeometrien AS 
  SELECT kp.ogc_fid,
     kp.ogr_pkid,
@@ -20,25 +26,40 @@ CREATE OR REPLACE VIEW qgisybau.v_punktgeometrien AS
     st_setsrid(st_makepoint(kp.rechtswert, kp.hochwert), 25832)::geometry(Point,25832) AS p_geom_2d
    FROM isybau.identi_datenk_stammd_abwassanlage_geomet_geomet_knoten_punkt kp;
 
--- KANTEN: Bildung der einfachen Liniengeometrien (Strecken)
-CREATE OR REPLACE VIEW qgisybau.v_liniengeometrien AS 
- SELECT kk.parent_ogr_pkid,
-    st_setsrid(st_makeline(st_makepoint(kk.start_rechtswert, kk.start_hochwert), 
-                           st_makepoint(kk.ende_rechtswert, kk.ende_hochwert)), 25832)::geometry(LineString,25832) AS l_geom_2d
-   FROM isybau.identi_datenk_stammd_abwassanlage_geomet_geomet_kanten_kante kk
--- sowie der Polylinien aus mehreren Abschnitten
-UNION ALL
-SELECT 
-	p.parent_ogr_pkid,
-	ST_UNION(st_setsrid(st_makeline(st_makepoint(pk.start_rechtswert, pk.start_hochwert), 
-									st_makepoint(pk.ende_rechtswert, pk.ende_hochwert)), 25832)::geometry(LineString,25832)) AS l_geom_2d
-FROM
-	isybau.ident_daten_stamm_abwasanlag_geome_geome_polygo_polygo_kante pk
-LEFT JOIN
-	isybau.ident_daten_stammd_abwassanlage_geomet_geomet_polygo_polygon p
-	ON pk.parent_ogr_pkid::text = p.ogr_pkid::text
-GROUP BY p.parent_ogr_pkid ORDER BY p.parent_ogr_pkid;
 
+
+-------------------------------------------------------------------
+-- KANTEN-GEOMETRIEN -----------------
+-------------------------------------------------------------------
+
+CREATE OR REPLACE VIEW qgisybau.v_liniengeometrien AS
+
+   SELECT 
+      kk.parent_ogr_pkid,
+      st_setsrid(st_makeline(st_makepoint(kk.start_rechtswert, kk.start_hochwert), 
+                             st_makepoint(kk.ende_rechtswert, kk.ende_hochwert)), 25832)::geometry(LineString, 25832) AS l_geom_2d
+   FROM 
+      isybau.identi_datenk_stammd_abwassanlage_geomet_geomet_kanten_kante kk
+
+   UNION ALL
+
+   SELECT 
+      pp.parent_ogr_pkid,
+      st_setsrid(ST_UNION(st_makeline(st_makepoint(pk.start_rechtswert, pk.start_hochwert), 
+                                      st_makepoint(pk.ende_rechtswert, pk.ende_hochwert))), 25832)::geometry(MultiLineString, 25832) AS l_geom_2d
+   FROM 
+      isybau.ident_daten_stamm_abwasanlag_geome_geome_polygo_polygo_kante pk
+   LEFT JOIN 
+      isybau.ident_daten_stammd_abwassanlage_geomet_geomet_polygo_polygon pp
+      ON pk.parent_ogr_pkid::TEXT = pp.ogr_pkid::TEXT
+   GROUP BY 
+      pp.parent_ogr_pkid;
+
+
+
+-------------------------------------------------------------------
+-- FLÄCHEN-GEOMETRIEN -----------------
+-------------------------------------------------------------------
 
 -- KNOTEN: Bildung von Flächengeometrien
 CREATE OR REPLACE VIEW qgisybau.v_flaechengeometrien AS 
